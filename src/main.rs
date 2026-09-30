@@ -37,8 +37,8 @@ pub fn name_pass() -> (String, String) {
 }
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let yes = name_pass();
-    let api = yes.1;
+    let name = name_pass();
+    let api = name.1;
 
     let call = geocoding::location_name();
     let resp: Vec<geocoding::Location> = reqwest::get(call)
@@ -50,7 +50,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&units=metric&appid={}",
             loc.lat, loc.lon, api
         );
-        println!("City: {}", yes.0);
+        println!("City: {}", name.0);
 
         let w_resp: WeatherResponse = reqwest::get(call).await?.json::<WeatherResponse>().await?;
 
