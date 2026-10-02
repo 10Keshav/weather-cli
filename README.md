@@ -29,8 +29,10 @@ cd weather-cli
 echo API_KEY > api_key.txt
 ```
 Windows
-`Create a directory in %APPDATA% called 'weather-cli'
+```
+Create a directory in %APPDATA% called 'weather-cli'
 Create a file 'api_key.txt'
 Paste the API_KEY in 'api_key.txt'
-`
+```
+
 3. Similar to Alternative 2, You can just make a file called 'api_key.txt' in your current working directory
