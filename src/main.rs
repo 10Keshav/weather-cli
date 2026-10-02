@@ -33,17 +33,6 @@ struct Cli {
 }
 
 pub fn get_api_key(key_cli: Option<String>) -> String {
-    if let Some(key) = key_cli {
-        return key;
-    }
-
-    if let Ok(key) = fs::read_to_string("api_key.txt") {
-        let trimmed = key.trim().to_string();
-        if !trimmed.is_empty() {
-            return trimmed;
-        }
-    }
-
     if let Some(mut path) = dirs::config_dir() {
         path.push("weather-cli");
         path.push("api_key.txt");
@@ -54,6 +43,18 @@ pub fn get_api_key(key_cli: Option<String>) -> String {
             }
         }
     }
+
+    if let Ok(key) = fs::read_to_string("api_key.txt") {
+        let trimmed = key.trim().to_string();
+        if !trimmed.is_empty() {
+            return trimmed;
+        }
+    }
+
+    if let Some(key) = key_cli {
+        return key;
+    }
+
     eprintln!("Err: No API key provided");
     eprintln!("Please pass -a <KEY> or put your key in 'api_key.txt'.");
     std::process::exit(1);
