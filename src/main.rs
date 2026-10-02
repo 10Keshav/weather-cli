@@ -1,5 +1,6 @@
 use clap::Parser;
 use serde::Deserialize;
+use std::fs;
 
 mod geocoding;
 
@@ -28,17 +29,46 @@ struct Cli {
     city: String,
 
     #[arg(global = false, short = 'a', long = "api-key")]
-    api_key: String,
+    api_key: Option<String>,
 }
 
-pub fn name_pass() -> (String, String) {
+pub fn get_api_key(key_cli: Option<String>) -> String {
+    if let Some(key) = key_cli {
+        return key;
+    }
+
+    if let Ok(key) = fs::read_to_string("api_key.txt") {
+        let trimmed = key.trim().to_string();
+        if !trimmed.is_empty() {
+            return trimmed;
+        }
+    }
+
+    if let Some(mut path) = dirs::config_dir() {
+        path.push("weather-cli");
+        path.push("api_key.txt");
+        if let Ok(key) = fs::read_to_string("api_key.txt") {
+            let trimmed = key.trim().to_string();
+            if !trimmed.is_empty() {
+                return trimmed;
+            }
+        }
+    }
+    eprintln!("Err: No API key provided");
+    eprintln!("Please pass -a <KEY> or put your key in 'api_key.txt'.");
+    std::process::exit(1);
+}
+
+fn name_pass() -> (String, Option<String>) {
     let args = Cli::parse();
     (args.city, args.api_key)
 }
+
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let name = name_pass();
-    let api = name.1;
+    let args = Cli::parse();
+    let city = args.city;
+    let api = get_api_key(args.api_key);
 
     let call = geocoding::location_name();
     let resp: Vec<geocoding::Location> = reqwest::get(call)
@@ -50,7 +80,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&units=metric&appid={}",
             loc.lat, loc.lon, api
         );
-        println!("City: {}", name.0);
+        println!("City: {}", city);
 
         let w_resp: WeatherResponse = reqwest::get(call).await?.json::<WeatherResponse>().await?;
 

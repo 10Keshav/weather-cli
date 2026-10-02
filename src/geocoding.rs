@@ -1,5 +1,6 @@
 use serde::Deserialize;
 
+use crate::get_api_key;
 use crate::name_pass;
 
 #[derive(Deserialize, Debug)]
@@ -9,10 +10,11 @@ pub struct Location {
 }
 
 pub fn location_name() -> String {
-    let yes = name_pass();
+    let cli = name_pass();
+    let api = get_api_key(cli.1);
 
     format!(
         "https://api.openweathermap.org/geo/1.0/direct?q={}&limit=1&appid={}",
-        yes.0, yes.1
+        cli.0, api
     )
 }
